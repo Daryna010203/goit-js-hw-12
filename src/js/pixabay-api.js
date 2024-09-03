@@ -1,10 +1,8 @@
 import axios from 'axios';
 
 axios.defaults.baseURL = 'https://pixabay.com';
-let perPage = 15;
-let page = 1;
 
-export const fetchPhotos = searchedQuery => {
+export const fetchPhotos = (searchedQuery, page, perPage) => {
   const axiosParams = {
     params: {
       key: '45521287-1fb3911845814b73b6d184262',

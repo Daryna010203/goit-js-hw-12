@@ -18,15 +18,18 @@ const lightbox = new SimpleLightbox('.gallery a', {
 });
 
 loaderEl.classList.add('hidden');
-loaderBtn.classList.add('hidden');
+
+let currentPage = 1;
+let searchedValue = '';
+let perPage = 15;
+let totalPage = null;
 
 const onSearchFormSubmit = async event => {
   try {
     event.preventDefault();
-    loaderEl.classList.remove('hidden');
-    loaderBtn.classList.add('hidden');
 
-    const searchedValue = searchFormBtn.elements.user_query.value.trim();
+    searchedValue = searchFormBtn.elements.user_query.value.trim();
+    currentPage = 1;
 
     if (searchedValue === '') {
       iziToast.show({
@@ -39,12 +42,15 @@ const onSearchFormSubmit = async event => {
         maxWidth: 432,
       });
 
-      loaderEl.classList.add('hidden');
       searchFormBtn.reset();
       galleryEl.innerHTML = '';
       return;
     }
-    const response = await fetchPhotos(searchedValue);
+    const response = await fetchPhotos(searchedValue, currentPage, perPage);
+
+    console.log(response);
+    totalPage = Math.ceil(response.data.total / perPage);
+    console.log(totalPage);
     if (response.data.total === 0) {
       iziToast.error({
         message:
@@ -59,7 +65,7 @@ const onSearchFormSubmit = async event => {
 
       galleryEl.innerHTML = '';
       loaderEl.classList.add('hidden');
-      loaderBtn.classList.add('hidden');
+
       searchFormBtn.reset();
       return;
     }
@@ -86,4 +92,31 @@ const onSearchFormSubmit = async event => {
   }
 };
 
+const onLoadClick = async event => {
+  try {
+    currentPage++;
+    const response = await fetchPhotos(searchedValue, currentPage, perPage);
+    const galleryCardsTemplate = response.data.hits
+      .map(imgDetails => createGalleryCardTemplate(imgDetails))
+      .join('');
+    galleryEl.insertAdjacentHTML('beforeend', galleryCardsTemplate);
+    lightbox.refresh();
+
+    if (currentPage === totalPage) {
+      loaderBtn.classList.add('hidden');
+    }
+  } catch (err) {
+    iziToast.error({
+      message: err.stack,
+      messageColor: '#fafafb',
+      messageSize: '16px',
+      messageLineHeight: '150%',
+      backgroundColor: '#ef4040',
+      position: 'topRight',
+      maxWidth: 432,
+    });
+  }
+};
+
 searchFormBtn.addEventListener('submit', onSearchFormSubmit);
+loaderBtn.addEventListener('click', onLoadClick);
