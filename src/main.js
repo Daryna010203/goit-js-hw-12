@@ -76,10 +76,14 @@ const onSearchFormSubmit = async event => {
     const galleryCardEl = galleryEl.querySelector('li');
     const card = galleryCardEl.getBoundingClientRect();
     cardHeight = card.height;
-
-    loaderEl.classList.add('hidden');
-    loaderBtn.classList.remove('hidden');
-    searchFormBtn.reset();
+    if (totalPage === 1) {
+      loaderBtn.classList.add('hidden');
+      loaderEl.classList.add('hidden');
+    } else {
+      loaderEl.classList.add('hidden');
+      loaderBtn.classList.remove('hidden');
+      searchFormBtn.reset();
+    }
   } catch (err) {
     iziToast.error({
       message: err.stack,
