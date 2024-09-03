@@ -17,17 +17,16 @@ const lightbox = new SimpleLightbox('.gallery a', {
   overlayOpacity: 0.7,
 });
 
-loaderEl.classList.add('hidden');
-
 let currentPage = 1;
 let searchedValue = '';
 let perPage = 15;
 let totalPage = null;
+let cardHeight = 0;
 
 const onSearchFormSubmit = async event => {
   try {
     event.preventDefault();
-
+    loaderEl.classList.remove('hidden');
     searchedValue = searchFormBtn.elements.user_query.value.trim();
     currentPage = 1;
 
@@ -41,16 +40,15 @@ const onSearchFormSubmit = async event => {
         position: 'topRight',
         maxWidth: 432,
       });
-
+      loaderEl.classList.add('hidden');
       searchFormBtn.reset();
       galleryEl.innerHTML = '';
       return;
     }
     const response = await fetchPhotos(searchedValue, currentPage, perPage);
 
-    console.log(response);
     totalPage = Math.ceil(response.data.total / perPage);
-    console.log(totalPage);
+
     if (response.data.total === 0) {
       iziToast.error({
         message:
@@ -75,7 +73,10 @@ const onSearchFormSubmit = async event => {
       .join('');
     galleryEl.innerHTML = galleryCardsTemplate;
 
-    lightbox.refresh();
+    const galleryCardEl = galleryEl.querySelector('li');
+    const card = galleryCardEl.getBoundingClientRect();
+    cardHeight = card.height;
+
     loaderEl.classList.add('hidden');
     loaderBtn.classList.remove('hidden');
     searchFormBtn.reset();
@@ -89,21 +90,38 @@ const onSearchFormSubmit = async event => {
       position: 'topRight',
       maxWidth: 432,
     });
+    loaderEl.classList.add('hidden');
   }
 };
 
 const onLoadClick = async event => {
   try {
+    loaderEl.classList.remove('hidden');
     currentPage++;
     const response = await fetchPhotos(searchedValue, currentPage, perPage);
     const galleryCardsTemplate = response.data.hits
       .map(imgDetails => createGalleryCardTemplate(imgDetails))
       .join('');
     galleryEl.insertAdjacentHTML('beforeend', galleryCardsTemplate);
+    scrollBy({
+      top: cardHeight * 2,
+      behavior: 'smooth',
+    });
     lightbox.refresh();
+    loaderEl.classList.add('hidden');
 
     if (currentPage === totalPage) {
       loaderBtn.classList.add('hidden');
+      loaderEl.classList.add('hidden');
+      iziToast.show({
+        message: `We're sorry, but you've reached the end of search result`,
+        messageColor: '#fafafb',
+        messageSize: '16px',
+        messageLineHeight: '150%',
+        backgroundColor: '#59a10d',
+        position: 'topRight',
+        maxWidth: 432,
+      });
     }
   } catch (err) {
     iziToast.error({
@@ -115,6 +133,7 @@ const onLoadClick = async event => {
       position: 'topRight',
       maxWidth: 432,
     });
+    loaderEl.classList.add('hidden');
   }
 };
 
