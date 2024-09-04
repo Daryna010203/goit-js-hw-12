@@ -72,11 +72,12 @@ const onSearchFormSubmit = async event => {
       .map(imgDetails => createGalleryCardTemplate(imgDetails))
       .join('');
     galleryEl.innerHTML = galleryCardsTemplate;
+    lightbox.refresh();
 
     const galleryCardEl = galleryEl.querySelector('li');
     const card = galleryCardEl.getBoundingClientRect();
     cardHeight = card.height;
-    lightbox.refresh();
+
     if (totalPage === 1) {
       loaderBtn.classList.add('hidden');
       loaderEl.classList.add('hidden');
@@ -84,6 +85,7 @@ const onSearchFormSubmit = async event => {
       loaderEl.classList.add('hidden');
       loaderBtn.classList.remove('hidden');
       searchFormBtn.reset();
+      lightbox.refresh();
     }
   } catch (err) {
     iziToast.error({
