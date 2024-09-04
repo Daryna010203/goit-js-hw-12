@@ -76,6 +76,7 @@ const onSearchFormSubmit = async event => {
     const galleryCardEl = galleryEl.querySelector('li');
     const card = galleryCardEl.getBoundingClientRect();
     cardHeight = card.height;
+    lightbox.refresh();
     if (totalPage === 1) {
       loaderBtn.classList.add('hidden');
       loaderEl.classList.add('hidden');
